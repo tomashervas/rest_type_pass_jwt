@@ -6,5 +6,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 require("./db");
 app_1.default.listen(app_1.default.get('port'), () => {
-    console.log('Express server listening on port' + app_1.default.get('port'));
+    console.log('Express server listening on port ' + app_1.default.get('port'));
 });

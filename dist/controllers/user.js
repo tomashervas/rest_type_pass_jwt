@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.signIn = exports.signUp = void 0;
 const user_1 = __importDefault(require("../models/user"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -30,6 +31,22 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.signUp = signUp;
 const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.json({ msg: "Sign In Successful" });
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ error: "Please provide email and password" });
+    }
+    const user = yield user_1.default.findOne({ email });
+    if (!user) {
+        return res.status(400).json({ error: "User does not exist" });
+    }
+    const isMatch = yield user.comparePassword(password);
+    if (!isMatch) {
+        return res.status(400).json({ error: "Invalid password" });
+    }
+    res.status(200).json({ token: generateAuthToken(user) });
 });
 exports.signIn = signIn;
+const generateAuthToken = (user) => {
+    const token = jsonwebtoken_1.default.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    return token;
+};
