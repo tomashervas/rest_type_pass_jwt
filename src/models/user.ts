@@ -2,19 +2,24 @@ import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
 interface IUser {
-    name: string;
+    email: string;
     password: string;
 }
 
 const userSchema = new Schema<IUser>({
-    name: { type: String, required: true, lowercase: true, trim: true },
+    email: { type: String, required: true, lowercase: true, trim: true },
     password: { type: String, required: true },
 });
 
 userSchema.pre("save", function(next) {
     if (!this.isModified("password")) return next();
-    const hash = bcrypt.hashSync(this.password, 10);
-    this.password = hash;
+    try{
+        this.password = bcrypt.hashSync(this.password, 10);
+        next();
+    }
+    catch(err){
+        next(new Error('Problem hashing password'));
+    }
     
 })
 
